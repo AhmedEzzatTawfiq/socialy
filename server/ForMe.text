@@ -1,0 +1,13 @@
+Terminal  :
+
+npm init -y
+npm install express cors dotenv mongoose multer
+npm install --save-dev nodemon
+
+
+*************************************************************
+
+Package.json  :
+
+"server": "nodemon server.js",
+"type": "module",
