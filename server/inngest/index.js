@@ -1,8 +1,9 @@
 import { Inngest } from "inngest";
 import User from "../models/User.js";
 import { sendEmail } from "../configs/nodemailer.js";
-// import { connection } from "mongoose";
 import Connection from "../models/Connections.js";
+import Message from "../models/Message.js";
+import Story from "../models/Story.js";
 
 // Create a client to send and receive events
 export const inngest = new Inngest({ id: "my-app" });
@@ -29,7 +30,7 @@ const syncUserCreation = inngest.createFunction(
 
         const userData = {
             _id: id,
-            username, 
+            username,
             email: email_addresses[0].email_address,
             full_name: `${first_name} ${last_name}`,
             profile_picture: image_url,
@@ -69,7 +70,7 @@ const syncUserDeletion = inngest.createFunction(
         triggers: [{ event: "clerk/user.deleted" }],
     },
     async ({ event }) => {
-        const { id } = event.data; 
+        const { id } = event.data;
 
         await User.findByIdAndDelete(id);
     }
@@ -84,7 +85,7 @@ const sendConnectionRequestEmail = inngest.createFunction(
         triggers: [{ event: "app/connection-request" }],
     },
     async ({ event, step }) => {
-        const {connectionId} = event.data;
+        const { connectionId } = event.data;
         await step.run("find-connection", async () => {
             const connection = await Connection.findById(connectionId).populate("from_userId to_userId");
             return connection;
@@ -110,7 +111,7 @@ const sendConnectionRequestEmail = inngest.createFunction(
                 </p>
             </div>
         `;
-        
+
         await sendEmail({
             to: connection.to_userId.email,
             subject,
@@ -121,8 +122,8 @@ const sendConnectionRequestEmail = inngest.createFunction(
         await step.sleepUntil("wait-for-24-hours", in24Hours);
         await step.run("send-connection-request-reminder", async () => {
             const connection = await Connection.findById(connectionId).populate("from_userId to_userId");
-            if(connection.status === "accepted") {
-                return {message: "Connection already accepted"};
+            if (connection.status === "accepted") {
+                return { message: "Connection already accepted" };
             }
             const subject = "Connection Request Reminder";
             const html = `
@@ -144,7 +145,7 @@ const sendConnectionRequestEmail = inngest.createFunction(
                     </p>
                 </div>
             `;
-            
+
             await sendEmail({
                 to: connection.to_userId.email,
                 subject,
@@ -152,11 +153,26 @@ const sendConnectionRequestEmail = inngest.createFunction(
             });
             return { message: "Connection request reminder sent" };
         });
-    
-        
-        
-    });
-   
+    }
+);
+
+//delete story
+
+const deleteStory = inngest.createFunction(
+    { id: "delete-story", triggers: [{ event: "app/story.delete" }] },
+    async ({ event, step }) => {
+        const { storyId } = event.data;
+        const in24Hours = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await step.sleepUntil("wait-24-hours", in24Hours);
+        await step.run("delete-story", async () => {
+            await Story.findByIdAndDelete(storyId);
+            return { message: "Story deleted" };
+        });
+    }
+);
+
+
+
 
 
 
@@ -168,5 +184,5 @@ export const functions = [
     syncUserUpdation,
     syncUserDeletion,
     sendConnectionRequestEmail,
-    
+    deleteStory
 ];
