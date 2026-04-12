@@ -2,17 +2,18 @@ import mongoose from 'mongoose';
 
 const storySchema = new mongoose.Schema({
     user: {
-        type: {type: String, required: true, ref: 'User'},    
+        type: String, required: true, ref: 'User'
     },
     content: {
         type: String,
     },
-    media_url: [{
-        type: String
-    }],
+    media_url: {
+        type: String,
+        default: ""
+    },
     media_type: {
         type: String,
-        enum: ['text', 'image', 'vedio']
+        enum: ['text', 'image', 'video']
     },
     views_count: [
         {

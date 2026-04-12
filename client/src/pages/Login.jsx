@@ -5,7 +5,7 @@ import { SignIn } from '@clerk/react'
 
 const Login = () => {
   return (
-    <div className='min-h-screen flex flex-col md:flex-row bg-gradient-to-br from-indigo-50 to-white relative overflow-hidden'>
+    <div className='min-h-screen flex flex-col md:flex-row bg-linear-to-br from-indigo-50 to-white relative overflow-hidden'>
       
       {/* logo */}
       <img src={assets.bg} alt="" className='absolute top-0 left-0 -z-10 w-full h-full object-cover opacity-20' />
@@ -29,7 +29,7 @@ const Login = () => {
             </div>
           </div>
 
-          <h1 className='text-4xl md:text-6xl font-bold leading-tight bg-gradient-to-r from-indigo-900 to-indigo-600 bg-clip-text text-transparent'>
+          <h1 className='text-4xl md:text-6xl font-bold leading-tight bg-linear-to-r from-indigo-900 to-indigo-600 bg-clip-text text-transparent'>
             More than just truly connect
           </h1>
 

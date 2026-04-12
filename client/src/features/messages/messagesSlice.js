@@ -1,0 +1,40 @@
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { fetchConnections } from "../connections/connectionsSlice";
+
+const initialState = {
+    messages: [],
+}
+
+ export const fetchMessages = createAsyncThunk("connections/fetchConnections", async (token, userId) => {
+    const {data} = await api.get("/api/user/connections", {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+    return data.success ? data : null
+})  
+
+export const messagesSlice = createSlice({
+    name: 'messages', 
+    initialState,
+    reducers: {
+        setMessages: (state, action) => {
+            state.messages = action.payload;
+        },
+        addMessage: (state, action) => {
+            state.messages = [...state.messages, action.payload];
+        },
+        resetMessages: (state) => {
+            state.messages = [];    
+        }
+    }, extraReducers: (builder) => {
+            builder.addCase(fetchMessages.fulfilled, (state, action) => {
+                if (action.payload) {
+                    state.messages = action.payload.messages;
+                }
+            });
+        }
+});
+
+export const {setMessages, addMessage, resetMessages} = messagesSlice.actions;
+export default messagesSlice.reducer;

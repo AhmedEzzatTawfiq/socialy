@@ -44,7 +44,8 @@ export const sendMessage = async (req, res) => {
                 file: fileBuffer,
                 fileName: image.originalname,
             });
-            media_url = imagekit.url({
+            if(result && result.filePath) {
+                media_url = imagekit.url({
                 path: result.filePath,
                 transformation: [
                     { quality: "auto" },
@@ -52,6 +53,7 @@ export const sendMessage = async (req, res) => {
                     { width: "1280" }
                 ]
             })
+            }
         }
         const message = await Message.create({
             from_user_id: userId,

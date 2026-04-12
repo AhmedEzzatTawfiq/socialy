@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+import dns from "node:dns/promises";
+
+// Change DNS
+dns.setServers(['8.8.8.8', '1.1.1.1']);                                                  //Very Impportant
+
 const connectDB = async () => {
     try {
         mongoose.connection.on("connected", () => console.log("Database connected"))

@@ -15,7 +15,14 @@ const pkg = { serve }
 
 await connectDB()
 app.use(express.json())
-app.use(cors())
+app.use(cors({
+    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    credentials: true
+}))
+app.use((req, res, next) => {
+    res.setHeader('Content-Security-Policy', "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; worker-src 'self' blob:; object-src 'self';")
+    next()
+})
 app.use(clerkMiddleware())
 app.get("/", (req, res) => res.send("Server is running"))
 app.use("/api/inngest", serve({ client: inngest, functions }))

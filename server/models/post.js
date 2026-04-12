@@ -1,9 +1,7 @@
 import mongoose from 'mongoose';
 
 const postSchema = new mongoose.Schema({
-    user: {
-        type: { type: String, required: true, ref: 'User' },
-    },
+    user: { type: String, required: true, ref: 'User' },
     content: {
         type: String,
     },

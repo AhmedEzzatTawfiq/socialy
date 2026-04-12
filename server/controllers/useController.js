@@ -1,4 +1,3 @@
-import { asyncWrapProviders } from "async_hooks"
 import imagekit from "../configs/imageKit.js"
 import User from "../models/User.js"
 import fs from "fs"
@@ -45,8 +44,8 @@ export const updateUserData = async (req, res) => {
             username, bio, location, full_name
         }
 
-        const profile = req.files.profile[0]
-        const cover = req.files.cover[0]
+        const profile = req.files?.profile?.[0]
+        const cover = req.files?.cover?.[0]
 
         if (profile) {
             const buffer = fs.readFileSync(profile.path)
@@ -60,7 +59,7 @@ export const updateUserData = async (req, res) => {
                 transformation: [
                     { quality: "auto" },
                     { format: "webp" },
-                    { width: "1280" }
+                    { width: "512" }
                 ]
             })
             updatedData.profile_picture = url;
@@ -69,7 +68,7 @@ export const updateUserData = async (req, res) => {
 
         if (cover) {
             const buffer = fs.readFileSync(cover.path)
-            const response = await imageKit.upload({
+            const response = await imagekit.upload({
                 file: buffer,
                 fileName: cover.originalname,
             })
@@ -79,13 +78,13 @@ export const updateUserData = async (req, res) => {
                 transformation: [
                     { quality: "auto" },
                     { format: "webp" },
-                    { width: "512" }
+                    { width: "1280" }
                 ]
             })
             updatedData.cover_photo = url;
         }
 
-        const user = await User.findByIdAndUpdate(userId, updatedData, { new: true })
+        const user = await User.findByIdAndUpdate(userId, updatedData, { returnDocument: 'after' })
         res.json({ success: true, user, message: "Profile update successfully" })
 
     } catch (error) {
@@ -214,6 +213,9 @@ export const getuserConnections = async (req, res) => {
     try {
         const { userId } = req.auth()
         const user = await User.findById(userId).populate("connections followers following")
+        if (!user) {
+            return res.json({ success: false, message: "User not found" })
+        }
         const connections = user.connections
         const followers = user.followers
         const following = user.following
@@ -231,7 +233,7 @@ export const acceptConnectionRequest = async (req, res) => {
     try {
         const { userId } = req.auth()
         const { id } = req.body
-        const connection = await Connection.find({ from_user_id: id, to_user_id: userId })
+        const connection = await Connection.findOne({ from_user_id: id, to_user_id: userId })
         if (!connection) {
             return res.json({ success: false, message: "connection not found" })
         }
@@ -256,9 +258,9 @@ export const acceptConnectionRequest = async (req, res) => {
 
 export const getUserProfile = async (req, res) => {
     try {
-        const { profileId } = req.body
+        const { profileId } = req.body;
         const profile = await User.findById(profileId)
-        if(!profile) {
+        if (!profile) {
             return res.json({ success: false, message: "Profile not found" })
         }
         const posts = await Post.find({ user: profileId }).populate("user")
