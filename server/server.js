@@ -16,7 +16,7 @@ const pkg = { serve }
 await connectDB()
 app.use(express.json())
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173'],
+    origin: ['http://localhost:3000', 'http://localhost:5173', 'https://socialyy.vercel.app'],
     credentials: true
 }))
 app.use((req, res, next) => {
