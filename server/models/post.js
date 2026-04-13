@@ -18,7 +18,10 @@ const postSchema = new mongoose.Schema({
             type: String,
             ref: 'User'
         }
-    ]
+    ],
+    reposted_from: { type: String, ref: 'Post', default: null },
+    repost_count: { type: Number, default: 0 },
+    comments_count: { type: Number, default: 0 }
 }, {
     timestamps: true,
     minimize: false

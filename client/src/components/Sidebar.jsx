@@ -12,38 +12,48 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     const { signOut } = useClerk()
 
     return (
-        <div className={`bg-white shadow-lg flex flex-col justify-between transition-transform duration-300 ease-in-out
+        <div className={`bg-white border-r border-gray-200 flex flex-col justify-between transition-transform duration-300 ease-in-out
             ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} 
-            fixed top-0 left-0 h-full w-60 z-40 sm:relative sm:translate-x-0`}>
+            fixed top-0 left-0 h-full w-64 z-40 sm:relative sm:translate-x-0`}>
 
             {/* Logo */}
             <div className='flex flex-col w-full'>
-                <img
-                    src={assets.logo}
-                    alt="Logo"
-                    className='w-24 ml-6 my-4 cursor-pointer'
-                    onClick={() => navigate("/")}
-                />
-                <hr className='border-gray-300' />
+                <div className='px-5 py-5'>
+                    <img
+                        src={assets.logo}
+                        alt="Logo"
+                        className='h-8 cursor-pointer'
+                        onClick={() => navigate("/")}
+                    />
+                </div>
 
                 {/* Menu Items */}
-                <div className='flex flex-col mt-4 gap-2 px-4'>
+                <div className='flex flex-col mt-1 gap-1 px-3'>
                     <MenuItems setSidebarOpen={setSidebarOpen} />
 
                     <Link
                         to="/createpost"
-                        className='flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-indigo-100 transition cursor-pointer text-gray-800 font-medium'
+                        className='flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-indigo-50 hover:text-indigo-700 transition-all duration-200 cursor-pointer text-gray-600 font-medium'
                     >
                         <CirclePlus className='w-5 h-5' />
                         Create Post
                     </Link>
                 </div>
             </div>
-            <UserButton />
-            <LogOut
-                onClick={() => signOut({ redirectUrl: "/" })}
-                className='w-4 text-gray-400 hover:text-gray-700 transition cursor-pointer'
-            />
+
+            {/* User Section */}
+            <div className='p-4 border-t border-gray-100'>
+                <div className='flex items-center justify-between'>
+                    <UserButton />
+                    <button
+                        onClick={() => signOut({ redirectUrl: "/" })}
+                        className='flex items-center gap-2 px-3 py-2 rounded-lg text-gray-500 bg-red-50 hover:text-red-600 transition-all duration-200 cursor-pointer text-sm font-medium'
+                    >
+                        <LogOut className='w-4 h-4' />
+                        Logout
+                    </button>
+                </div>
+            </div>
         </div>
     )
 }

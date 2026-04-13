@@ -1,12 +1,8 @@
 import mongoose from 'mongoose';
 
 const messageSchema = new mongoose.Schema({
-    from_user_id: {
-        type: { type: String, required: true, ref: 'User' },
-    },
-    to_user_id: {
-        type: { type: String, required: true, ref: 'User' },
-    },
+    from_user_id: { type: String, required: true, ref: 'User' },
+    to_user_id: {type: String, required: true, ref: 'User' },
     text: {
         type: String, trim: true,
     },

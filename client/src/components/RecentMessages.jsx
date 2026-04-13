@@ -5,6 +5,7 @@ import moment from 'moment'
 import { useAuth, useUser } from '@clerk/react'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
+import { Image, Video } from 'lucide-react'
 
 const RecentMessages = () => {
     const [messages, setMessages] = useState([])
@@ -12,7 +13,7 @@ const RecentMessages = () => {
     const { getToken } = useAuth()
     const fetchRecentMessages = async () => {
         try {
-            const { data } = await api.post("/api/user/recent-messages", {}, {
+            const { data } = await api.post("/api/message/recent-messages", {}, {
                 headers: { Authorization: `Bearer ${await getToken()}` }
             })
             if (data.success) {
@@ -47,7 +48,7 @@ const RecentMessages = () => {
             <div className='flex flex-col max-h-56 overflow-y-scroll no-scrollbar'>
                 {
                     messages.map((messages, index) => (
-                        <Link to={`/messages/${messages.from_user_id._id}`} key={index} className='flex items-start gap-3 py-2 hover:bg-slate-100'>
+                        <Link to={`/messages/${messages.from_user_id._id}`} key={index} className='flex items-start gap-3 py-2 hover:bg-slate-100 cursor-pointer'>
                             <img src={messages.from_user_id.profile_picture} alt="" className='w-8 h-8 rounded-full' />
                             <div className='w-full'>
                                 <div className='flex justify-between'>
@@ -55,7 +56,15 @@ const RecentMessages = () => {
                                     <p className='text-[10px]'>{moment(messages.createdAt).fromNow()}</p>
                                 </div>
                                 <div className='flex justify-between'>
-                                    <p className='text-gray-500'>{messages.text ? messages.text : "media"}</p>
+                                    <p className='text-gray-500'>
+                                        {messages.text ? messages.text : (
+                                            messages.message_type === 'image' ? (
+                                                <span className='flex items-center gap-1'><Image className='w-4 h-4' /> Image</span>
+                                            ) : (
+                                                <span className='flex items-center gap-1'><Video className='w-4 h-4' /> Video</span>
+                                            )
+                                        )}
+                                    </p>
                                     {
                                         !messages.seen && <p className='bg-indigo-500 text-white h-4 w-4 flex items-center justify-center rounded-full text-[10px]'>1</p>
                                     }

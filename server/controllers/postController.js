@@ -91,3 +91,76 @@ export const likePost = async (req, res) => {
     }
 }
 
+// Repost post
+export const repostPost = async (req, res) => {
+    try {
+        const { userId } = req.auth();
+        const { postId } = req.body;
+        const originalPost = await Post.findById(postId);
+
+        if (!originalPost) {
+            return res.json({ success: false, message: 'Post not found' });
+        }
+
+        // Check if user already reposted this post
+        const existingRepost = await Post.findOne({ user: userId, reposted_from: postId });
+        if (existingRepost) {
+            // Remove the repost
+            await Post.findByIdAndDelete(existingRepost._id);
+            // Decrement repost count on original post
+            await Post.findByIdAndUpdate(postId, { $inc: { repost_count: -1 } });
+            res.json({ success: true, message: 'Repost removed', reposted: false });
+        } else {
+            // Create new repost
+            const repost = await Post.create({
+                user: userId,
+                content: originalPost.content,
+                image_urls: originalPost.image_urls,
+                post_type: originalPost.post_type,
+                reposted_from: postId
+            });
+
+            // Increment repost count on original post
+            await Post.findByIdAndUpdate(postId, { $inc: { repost_count: 1 } });
+
+            const populatedRepost = await Post.findById(repost._id).populate('user');
+
+            res.json({ success: true, post: populatedRepost, reposted: true });
+        }
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+
+// Delete post
+export const deletePost = async (req, res) => {
+    try {
+        const { userId } = req.auth();
+        const { postId } = req.body;
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return res.json({ success: false, message: 'Post not found' });
+        }
+
+        if (post.user.toString() !== userId) {
+            return res.json({ success: false, message: 'You can only delete your own posts' });
+        }
+
+        // If this is a repost, decrement the repost count on the original post
+        if (post.reposted_from) {
+            await Post.findByIdAndUpdate(post.reposted_from, { $inc: { repost_count: -1 } });
+        }
+
+        // Delete all reposts of this post
+        await Post.deleteMany({ reposted_from: postId });
+
+        await Post.findByIdAndDelete(postId);
+        res.json({ success: true, message: 'Post deleted successfully' });
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: error.message });
+    }
+}
+

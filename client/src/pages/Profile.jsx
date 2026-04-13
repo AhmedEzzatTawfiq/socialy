@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { dummyPostsData, dummyUserData } from '../assets/assets'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import PostCard from '../components/PostCard'
 import UserProfileInfo from '../components/UserProfileInfo'
-import { Link } from 'lucide-react'
 import Loading from '../components/Loading'
 import ProfileModel from '../components/ProfileModel'
 import moment from 'moment'
@@ -42,6 +41,10 @@ const Profile = () => {
     }
   }
 
+  const handleDeletePost = (postId) => {
+    serPosts(prev => prev.filter(post => post._id !== postId))
+  }
+
   useEffect(() => {
     if (profileId) {
       fetchUser(profileId)
@@ -65,8 +68,8 @@ const Profile = () => {
         <div className='mt-6'>
           <div className='bg-white flex rounded-xl shadow p-1 max-w-md mx-auto'>
             {
-              ["posts", "media", "lists"].map((tab) => (
-                <button onClick={() => setActiveTab(tab)} key={tab} className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer 
+              ["posts", "media"].map((tab) => (
+                <button onClick={() => setActiveTab(tab)} key={tab} className={`flex-1 px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer
                 ${activeTab === tab ? "bg-indigo-600 text-white" : "to-gray-600 hover:text-gray-900"}`}>
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 </button>
@@ -77,30 +80,31 @@ const Profile = () => {
             activeTab === "posts" && (
               <div className='mt-6 flex flex-col items-center gap-6'>
                 {
-                  posts.map((post) => <PostCard key={post._id} post={post} />)
+                  posts.map((post) => <PostCard key={post._id} post={post} onDelete={handleDeletePost} />)
                 }
               </div>
             )
           }
           {
             activeTab === "media" && (
-              <div className='flex flex-wrap mt-6 max-w-6xl'>
+              <div className='flex flex-wrap mt-6 max-w-6xl gap-3'>
                 {
-                  posts.filter((post) => post.image_urls.length > 0).map((post) => (
-                    <>
-                      {
-                        post.image_urls.map((image, index) => (
-                          <Link target='_blank' to={image} key={index} className='relative group'>
-                            <img src={image} key={index} alt="" className='w-64 aspect-video object-cover' />    {/*aspect-video */}
-                            <p className='absolute bottom-0 right-0 text-xs p-1 px-3 backdrop:blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300'>
-                              Posted {moment(post.createdAt).fromNow()}
-                            </p>
-                          </Link>
-                        ))
-                      }
-                    </>
+                  posts.filter((post) => post.image_urls && post.image_urls.length > 0).map((post) => (
+                    post.image_urls.map((image, index) => (
+                      <a href={image} target='_blank' rel='noopener noreferrer' key={`${post._id}-${index}`} className='relative group cursor-pointer'>
+                        <img src={image} alt="" className='w-64 h-48 object-cover rounded-lg' />
+                        <p className='absolute bottom-0 right-0 text-xs p-1 px-3 backdrop-blur-xl text-white opacity-0 group-hover:opacity-100 transition duration-300'>
+                          Posted {moment(post.createdAt).fromNow()}
+                        </p>
+                      </a>
+                    ))
                   ))
                 }
+                {posts.filter((post) => post.image_urls && post.image_urls.length > 0).length === 0 && (
+                  <div className='w-full text-center py-12 text-gray-500'>
+                    No media posts yet
+                  </div>
+                )}
               </div>
             )
           }

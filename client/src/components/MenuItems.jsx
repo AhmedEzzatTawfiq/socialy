@@ -8,20 +8,20 @@ const MenuItems = ({ setSidebarOpen }) => {
     return (
         <div className='text-gray-600'>
             {
-                menuItemsData.map(({ to, label, Icon}) => (
+                menuItemsData.map(({ to, label, Icon }) => (
                     <NavLink key={to} to={to} end={to === "/"} onClick={() =>
                         setSidebarOpen(false)
-                    } className={({isActive})=> `px-3.5 py-2 flex items-center gap-2 rounded-xl
+                    } className={({ isActive }) => `px-3.5 py-2 flex items-center gap-2 rounded-xl cursor-pointer
 
             ${isActive ? "bg-indigo-50 text-indigo-700" : "hover:bg-gray-50"}`}>
-            <Icon className='w-5 h-5' />
-            {label}
+                        <Icon className='w-5 h-5' />
+                        {label}
 
-        </NavLink>
+                    </NavLink>
                 ))
-        }
-    </div >
-  )
+            }
+        </div >
+    )
 }
 
 export default MenuItems

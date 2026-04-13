@@ -15,7 +15,7 @@ export const getUserData = async (req, res) => {
     try {
         const { userId } = req.auth()
         const user = await User.findById(userId)
-        if (!userId) {
+        if (!user) {
             return res.json({ success: false, message: "User not found" })
         }
         res.json({ success: true, user })
@@ -29,7 +29,7 @@ export const getUserData = async (req, res) => {
 export const updateUserData = async (req, res) => {
     try {
         const { userId } = req.auth()
-        let { username, bio, location, full_name } = req.body
+        let { username, bio, location, full_name, delete_profile } = req.body
         const tempUser = await User.findById(userId)
         !username && (username = tempUser.username)
 
@@ -47,7 +47,9 @@ export const updateUserData = async (req, res) => {
         const profile = req.files?.profile?.[0]
         const cover = req.files?.cover?.[0]
 
-        if (profile) {
+        if (delete_profile === 'true') {
+            updatedData.profile_picture = null
+        } else if (profile) {
             const buffer = fs.readFileSync(profile.path)
             const response = await imagekit.upload({
                 file: buffer,

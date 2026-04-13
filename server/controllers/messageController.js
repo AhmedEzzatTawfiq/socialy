@@ -44,15 +44,15 @@ export const sendMessage = async (req, res) => {
                 file: fileBuffer,
                 fileName: image.originalname,
             });
-            if(result && result.filePath) {
+            if (result && result.filePath) {
                 media_url = imagekit.url({
-                path: result.filePath,
-                transformation: [
-                    { quality: "auto" },
-                    { format: "webp" },
-                    { width: "1280" }
-                ]
-            })
+                    path: result.filePath,
+                    transformation: [
+                        { quality: "auto" },
+                        { format: "webp" },
+                        { width: "1280" }
+                    ]
+                })
             }
         }
         const message = await Message.create({

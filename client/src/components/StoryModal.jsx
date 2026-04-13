@@ -86,7 +86,7 @@ const StoryModal = ({ setShowModal, fetchStories }) => {
             <div className='w-full max-w-md bg-zinc-900 rounded-2xl shadow-xl p-4 flex flex-col gap-4'>
                 {/* Header */}
                 <div className='flex items-center justify-between'>
-                    <button onClick={() => setShowModal(false)} className='p-2 rounded-full hover:bg-zinc-800'>
+                    <button onClick={() => setShowModal(false)} className='p-2 rounded-full hover:bg-zinc-800 cursor-pointer'>
                         <ArrowLeft className='text-white' />
                     </button>
                     <h2 className='text-lg font-semibold text-white'>Create Story</h2>
@@ -128,7 +128,7 @@ const StoryModal = ({ setShowModal, fetchStories }) => {
                 <div className='flex gap-2'>
                     <button
                         onClick={() => { setMode("text"); setMedia(null); setPreviewUrl(null) }}
-                        className={`flex-1 flex items-center justify-center gap-2 p-2 rounded ${mode === "text" ? "bg-white text-black" : "bg-zinc-800"}`}
+                        className={`flex-1 flex items-center justify-center gap-2 p-2 rounded cursor-pointer ${mode === "text" ? "bg-white text-black" : "bg-zinc-800"}`}
                     >
                         <TextIcon size={18} /> Text
                     </button>
@@ -145,7 +145,7 @@ const StoryModal = ({ setShowModal, fetchStories }) => {
                         success: "Story created!",
                         error: "Failed to create story"
                     })}
-                    className='flex items-center justify-center gap-2 py-3 w-full rounded-xl bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 active:scale-95 transition-transform'
+                    className='flex items-center justify-center gap-2 py-3 w-full rounded-xl bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 active:scale-95 transition-transform cursor-pointer'
                 >
                     <Sparkle size={18} /> Create Story
                 </button>
