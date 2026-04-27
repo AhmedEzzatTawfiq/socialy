@@ -19,12 +19,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {/* Logo */}
             <div className='flex flex-col w-full'>
                 <div className='px-5 py-5'>
-                    <img
-                        src={assets.logo}
-                        alt="Logo"
-                        className='h-8 cursor-pointer'
+                    <h1
+                        className='text-2xl font-bold bg-linear-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent cursor-pointer'
                         onClick={() => navigate("/")}
-                    />
+                    >
+                        Socialy
+                    </h1>
                 </div>
 
                 {/* Menu Items */}
