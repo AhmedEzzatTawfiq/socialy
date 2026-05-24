@@ -49,9 +49,9 @@ const UserCard = ({ user }) => {
   }
   return (
     <div key={user._id} className='p-4 pt-6 flex flex-col justify-between border border-gray-200 rounded-md'>
-      <div className='text-center'>
-        <img src={user.profile_picture} alt="" className='rounded-full w-16 shadow-md mx-auto' />
-        <p className='mt-4 font-semibold'>{user.full_name}</p>
+      <div className='text-center cursor-pointer' onClick={() => navigate(`/profile/${user._id}`)}>
+        <img src={user.profile_picture} alt="" className='rounded-full w-16 shadow-md mx-auto hover:scale-105 transition-transform' />
+        <p className='mt-4 font-semibold hover:text-indigo-600 transition-colors'>{user.full_name}</p>
         {
           user.username && <p className='text-gray-500 font-light'>@{user.username}</p>
         }

@@ -106,7 +106,7 @@ const Connections = () => {
             dataArray.find((item) => item.label === currentTab).value.length > 0 ? (
               dataArray.find((item) => item.label === currentTab).value.map((user) => (
                 <div key={user._id} className='flex flex-col gap-4 p-4 sm:p-5 bg-white shadow rounded-lg'>
-                  <div className='flex gap-3 sm:gap-4 items-start'>
+                  <div className='flex gap-3 sm:gap-4 items-start cursor-pointer hover:opacity-80 transition-opacity' onClick={() => navigate(`/profile/${user._id}`)}>
                     <img src={user.profile_picture} alt="" className='rounded-full w-12 h-12 sm:w-14 sm:h-14 shadow-md shrink-0' />
                     <div className='flex-1 min-w-0'>
                       <p className='font-medium text-slate-700 text-sm sm:text-base truncate'>{user.full_name}</p>
@@ -135,7 +135,7 @@ const Connections = () => {
                     }
                     {
                       currentTab === "Connections" && (
-                        <button className='flex-1 flex justify-center items-center gap-1 p-2 text-xs sm:text-sm rounded-lg text-slate-800 bg-slate-100 hover:bg-slate-200 active:scale-95 transition cursor-pointer'>
+                        <button onClick={() => navigate(`/messages/${user._id}`)} className='flex-1 flex justify-center items-center gap-1 p-2 text-xs sm:text-sm rounded-lg text-slate-800 bg-slate-100 hover:bg-slate-200 active:scale-95 transition cursor-pointer'>
                           <MessageSquare className='w-4 h-4' />
                           Message
                         </button>

@@ -46,7 +46,7 @@ const PostCard = ({ post, onDelete }) => {
             const token = await getToken()
             const { data } = await api.post('/api/post/repost', { postId: post._id }, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}` 
                 }
             })
             if (data.success) {
@@ -242,11 +242,11 @@ const PostCard = ({ post, onDelete }) => {
                 <div className='space-y-2 max-h-60 overflow-y-auto'>
                     {(showAllComments ? comments : comments.slice(0, 3)).map((comment) => (
                         <div key={comment._id} className='flex gap-2 items-start'>
-                            <img src={comment.user.profile_picture} alt='' className='w-6 h-6 sm:w-8 sm:h-8 rounded-full' />
+                            <img src={comment.user.profile_picture} alt='' className='w-6 h-6 sm:w-8 sm:h-8 rounded-full cursor-pointer hover:opacity-80 transition-opacity' onClick={() => navigate(`/profile/${comment.user._id}`)} />
                             <div className='flex-1'>
                                 <div className='flex items-center gap-2 justify-between'>
                                     <div className='flex items-center gap-2'>
-                                        <span className='font-semibold text-xs sm:text-sm'>{comment.user.full_name}</span>
+                                        <span className='font-semibold text-xs sm:text-sm cursor-pointer hover:text-indigo-600 transition-colors' onClick={() => navigate(`/profile/${comment.user._id}`)}>{comment.user.full_name}</span>
                                         <span className='text-gray-500 text-[10px] sm:text-xs'>{moment(comment.createdAt).fromNow()}</span>
                                     </div>
                                     {comment.user._id === currentUser?._id && (

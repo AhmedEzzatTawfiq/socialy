@@ -9,7 +9,7 @@ import Post from "../models/post.js"
 
 
 
-//get user data using userId
+//get user data using userIdq
 
 export const getUserData = async (req, res) => {
     try {
