@@ -1,5 +1,6 @@
 import { BadgeCheck, X, Trash2 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import moment from 'moment'
 import { useAuth } from '@clerk/react'
 import api from '../api/axios'
@@ -8,8 +9,17 @@ import toast from 'react-hot-toast'
 const StoryViewer = ({ viewStory, setViewStory, fetchStories }) => {
     const [progress, setProgress] = useState(0)
     const { getToken } = useAuth()
+    const navigate = useNavigate()
 
     const handleClose = () => setViewStory(null)
+
+    const handleUserClick = (e) => {
+        e.stopPropagation()
+        if (viewStory?.user?._id) {
+            handleClose()
+            navigate(`/profile/${viewStory.user._id}`)
+        }
+    }
 
     const handleDeleteStory = async () => {
         try {
@@ -85,16 +95,19 @@ const StoryViewer = ({ viewStory, setViewStory, fetchStories }) => {
             </div>
 
             {/* User Info */}
-            <div className='absolute top-4 left-4 flex items-center gap-3 backdrop-blur-md bg-black/50 p-2 rounded-xl'>
+            <div 
+                onClick={handleUserClick}
+                className='absolute top-4 left-4 flex items-center gap-3 backdrop-blur-md bg-black/50 p-2 rounded-xl cursor-pointer hover:bg-black/75 transition-colors z-50'
+            >
                 <img
-                    src={viewStory.user?.profile_picture}
+                    src={viewStory.user?.profile_picture || '/default-avatar.png'}
                     alt=""
                     className='w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover border border-white'
                 />
                 <div className='flex flex-col'>
-                    <div className='flex items-center gap-1 text-white font-medium'>
+                    <div className='flex items-center gap-1 text-white font-medium hover:underline'>
                         <span>{viewStory.user?.full_name || viewStory.user?.username || 'Unknown'}</span>
-                        <BadgeCheck size={16} />
+                        <BadgeCheck size={16} className='text-blue-400' />
                     </div>
                     <span className='text-white/70 text-xs'>
                         {moment(viewStory.createdAt).fromNow()}
