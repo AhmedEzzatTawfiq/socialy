@@ -4,12 +4,12 @@ import { Menu, X } from 'lucide-react';
 import { useUser } from '@clerk/react';
 import Loading from '../components/Loading';
 import Sidebar from '../components/Sidebar';
-// import { useSelector } from 'react-redux';
+import { useRealtime } from '../hooks/useRealtime';
 
 const Layout = () => {
   const { user } = useUser()
-  // const user = useSelector((state) => state.user.value)
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useRealtime()
 
   const handleContentClick = () => {
     if (sidebarOpen) {
