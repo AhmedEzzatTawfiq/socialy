@@ -13,7 +13,8 @@ import {
     CheckCheck,
     Sparkles,
     ChevronRight,
-    MessageCircle
+    MessageCircle,
+    Check
 } from 'lucide-react';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
@@ -21,11 +22,13 @@ import { fetchConnections } from '../features/connections/connectionsSlice';
 
 const Notifications = () => {
     const { items: notifications, unreadCount, loading } = useSelector((state) => state.notifications);
+    const connections = useSelector((state) => state.connections.connections);
     const dispatch = useDispatch();
     const { getToken } = useAuth();
     const navigate = useNavigate();
 
     const [activeTab, setActiveTab] = useState('all'); // 'all', 'likes', 'comments', 'connections'
+    const [acceptedNotifs, setAcceptedNotifs] = useState(new Set());
 
     const handleMarkAllRead = async () => {
         const token = await getToken();
@@ -55,6 +58,7 @@ const Notifications = () => {
 
     const handleAcceptConnection = async (e, senderId, notifId) => {
         e.stopPropagation();
+        setAcceptedNotifs((prev) => new Set(prev).add(notifId));
         try {
             const token = await getToken();
             const { data } = await api.post(
@@ -64,7 +68,7 @@ const Notifications = () => {
             );
 
             if (data.success) {
-                toast.success('Connection request accepted!');
+                toast.success('Request accepted');
                 dispatch(fetchConnections(token));
                 dispatch(markNotificationsAsRead({ token, notificationId: notifId }));
             } else {
@@ -245,23 +249,32 @@ const Notifications = () => {
 
                                 {/* Connection Request Action */}
                                 {notif.type === 'connection_request' && (
-                                    <div className="mt-3 flex items-center gap-2">
-                                        <button
-                                            onClick={(e) => handleAcceptConnection(e, notif.sender?._id, notif._id)}
-                                            className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
-                                        >
-                                            Accept Request
-                                        </button>
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                navigate('/connections');
-                                            }}
-                                            className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-all cursor-pointer"
-                                        >
-                                            View Request
-                                        </button>
-                                    </div>
+                                    acceptedNotifs.has(notif._id) || connections?.some((c) => c._id === notif.sender?._id) ? (
+                                        <div className="mt-3">
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200/80 rounded-lg text-xs font-semibold">
+                                                <Check className="w-3.5 h-3.5 text-emerald-600" />
+                                                Request accepted
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="mt-3 flex items-center gap-2">
+                                            <button
+                                                onClick={(e) => handleAcceptConnection(e, notif.sender?._id, notif._id)}
+                                                className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all cursor-pointer"
+                                            >
+                                                Accept Request
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    navigate('/connections');
+                                                }}
+                                                className="px-3.5 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-xs font-medium transition-all cursor-pointer"
+                                            >
+                                                View Request
+                                            </button>
+                                        </div>
+                                    )
                                 )}
                             </div>
 

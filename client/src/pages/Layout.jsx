@@ -21,7 +21,7 @@ const Layout = () => {
   return user ? (
     <div className='w-full flex h-screen overflow-hidden'>
       <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      <div className={`flex-1 bg-slate-50 overflow-y-auto ${!sidebarOpen ? 'pb-16 sm:pb-0' : ''}`} onClick={handleContentClick}>
+      <div className={`flex-1 bg-slate-50 h-full overflow-y-auto ${!sidebarOpen ? 'pb-16 sm:pb-0' : ''}`} onClick={handleContentClick}>
         <Outlet />
       </div>
       {!sidebarOpen && <BottomNav />}

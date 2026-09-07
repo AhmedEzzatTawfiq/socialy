@@ -2,13 +2,12 @@ import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { CirclePlus, LogOut } from 'lucide-react'
 import MenuItems from './MenuItems'
-import { useClerk, useUser } from '@clerk/react'
+import { useClerk } from '@clerk/react'
 import { useSelector } from 'react-redux'
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate()
     const user = useSelector((state) => state.user.value)
-    const { user: clerkUser } = useUser()
     const { signOut } = useClerk()
 
     return (
@@ -44,23 +43,34 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             {/* User Section */}
             <div className='p-4 border-t border-gray-100'>
                 <div className='flex items-center justify-between gap-2'>
-                    <div 
-                        onClick={() => {
-                            setSidebarOpen(false)
-                            navigate('/profile')
-                        }} 
-                        className='flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity min-w-0 flex-1'
-                    >
-                        <img 
-                            src={user?.profile_picture || clerkUser?.imageUrl || '/default-avatar.png'} 
-                            alt={user?.full_name || 'User profile'} 
-                            className='w-9 h-9 rounded-full object-cover border border-gray-200 shadow-xs shrink-0' 
-                        />
-                        <div className='min-w-0 flex-1'>
-                            <p className='text-xs font-semibold text-gray-900 truncate'>{user?.full_name || clerkUser?.fullName}</p>
-                            <p className='text-[11px] text-gray-500 truncate'>@{user?.username || clerkUser?.username || 'user'}</p>
+                    {!user ? (
+                        <div className='flex items-center gap-2.5 min-w-0 flex-1 animate-pulse'>
+                            <div className='w-9 h-9 rounded-full bg-gray-200 shrink-0' />
+                            <div className='min-w-0 flex-1 space-y-1.5'>
+                                <div className='h-3 bg-gray-200 rounded w-20' />
+                                <div className='h-2.5 bg-gray-200 rounded w-14' />
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                        <div 
+                            onClick={() => {
+                                setSidebarOpen(false)
+                                navigate('/profile')
+                            }} 
+                            className='flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity min-w-0 flex-1'
+                        >
+                            <img 
+                                src={user.profile_picture || '/default-avatar.png'} 
+                                alt={user.full_name || 'User profile'} 
+                                className='w-9 h-9 rounded-full object-cover border border-gray-200 shadow-xs shrink-0' 
+                            />
+                            <div className='min-w-0 flex-1'>
+                                <p className='text-xs font-semibold text-gray-900 truncate'>{user.full_name}</p>
+                                {user.username && <p className='text-[11px] text-gray-500 truncate'>@{user.username}</p>}
+                            </div>
+                        </div>
+                    )}
+
                     <button
                         onClick={() => signOut({ redirectUrl: "/" })}
                         title="Logout"

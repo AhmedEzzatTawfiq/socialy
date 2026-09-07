@@ -1,13 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { dummyMessagesData, dummyUserData } from '../assets/assets'
 import { ImageIcon, SendHorizonal } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useAuth } from '@clerk/react'
 import { addMessage, fetchMessages, resetMessages } from '../features/messages/messagesSlice'
 import toast from 'react-hot-toast'
 import api from '../api/axios'
-import { useNavigate } from 'react-router-dom'
 
 const ChatBox = () => {
   const { messages } = useSelector((state) => state.messages)
@@ -22,15 +20,16 @@ const ChatBox = () => {
   const messagesEndRef = useRef(null)
 
   const connections = useSelector((state) => state.connections.connections)
+
   const fetchUserMessages = async () => {
     try {
       const token = await getToken()
       dispatch(fetchMessages({ token, userId }))
-
     } catch (error) {
       toast.error(error.message)
     }
   }
+
   const sendMessage = async () => {
     try {
       if (!text && !image) return
@@ -46,11 +45,9 @@ const ChatBox = () => {
         setText("")
         setImage(null)
         dispatch(addMessage(data.message))
-        console.log(data)
       } else {
         throw new Error(data.message)
       }
-
     } catch (error) {
       toast.error(error.message)
     }
@@ -64,65 +61,100 @@ const ChatBox = () => {
   }, [userId])
 
   useEffect(() => {
-    if (connections.length > 0) {
-      const user = connections.find(connection => connection._id === userId)
-      setUser(user)
+    const fetchTargetUser = async () => {
+      if (connections && connections.length > 0) {
+        const found = connections.find(connection => connection._id === userId)
+        if (found) {
+          setUser(found)
+          return
+        }
+      }
+      try {
+        const token = await getToken()
+        const { data } = await api.post("/api/user/profiles", { profileId: userId }, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        if (data.success) {
+          setUser(data.profile)
+        }
+      } catch (error) {
+        console.error("Error loading chat target user:", error)
+      }
     }
-  }, [connections])
+    if (userId) {
+      fetchTargetUser()
+    }
+  }, [userId, connections, getToken])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
   return (
-    <div className='flex flex-col h-screen'>
-      <div onClick={() => navigate(`/profile/${userId}`)} className='flex items-center gap-2 p-2 md:px-10 xl:pl-40 bg-linear-to-r from-indigo-50 to-purple-50 border-b border-gray-300 cursor-pointer'>
-        <img src={user?.profile_picture} alt="" className='size-8 rounded-full' />
+    <div className='flex flex-col h-full overflow-hidden bg-slate-50'>
+      {/* Header */}
+      <div 
+        onClick={() => navigate(`/profile/${userId}`)} 
+        className='flex items-center gap-3 p-3 md:px-10 xl:pl-40 bg-white border-b border-gray-200 cursor-pointer shrink-0 shadow-xs'
+      >
+        <img 
+          src={user?.profile_picture || '/default-avatar.png'} 
+          alt={user?.full_name || 'Chat'} 
+          className='w-9 h-9 rounded-full object-cover border border-gray-200 shrink-0' 
+        />
         <div>
-          <p className='font-medium'>{user?.full_name}</p>
-          <p className='text-sm text-gray-500 -m-1.5'>@{user?.username}</p>
-        </div>
-      </div>
-      <div className='p-3 md:p-5 flex-1 overflow-y-scroll'>
-        <div className='space-y-4 max-w-full'>
-          {
-            messages.toSorted((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map((message, index) => {
-              const isOwnMessage = message.from_user_id === currentUserId
-              return (
-                <div key={index} className={`flex flex-col ${isOwnMessage ? "items-end" : "items-start"}`}>
-                  <div className={`p-2 text-sm max-w-[80%] sm:max-w-sm rounded-lg shadow ${isOwnMessage ? "bg-indigo-500 text-white rounded-br-none" : "bg-white text-gray-900 rounded-bl-none"}`}>
-                    {
-                      message.message_type === "image" && <img src={message.media_url} alt=""
-                        className='w-full max-w-sm mb-1 rounded-lg' />
-                    }
-                    <p>{message.text}</p>
-                  </div>
-                </div>
-              )
-            })
-          }
-          <div ref={messagesEndRef}>
-
-          </div>
+          <p className='font-semibold text-gray-900 text-sm md:text-base leading-tight'>{user?.full_name || 'Chat'}</p>
+          {user?.username && <p className='text-xs text-gray-500'>@{user?.username}</p>}
         </div>
       </div>
 
-      <div className='px-3 pb-4 md:px-4'>
-        <div className='flex items-center gap-2 pl-3 bg-white w-full border border-gray-200 shadow rounded-full'>
-          <input type="text" className='flex-1 outline-none text-slate-700 text-sm'
+      {/* Messages Scroll Container */}
+      <div className='p-3 md:p-5 flex-1 overflow-y-auto space-y-4'>
+        {messages.toSorted((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map((message, index) => {
+          const isOwnMessage = message.from_user_id === currentUserId
+          return (
+            <div key={index} className={`flex flex-col ${isOwnMessage ? "items-end" : "items-start"}`}>
+              <div className={`p-3 text-sm max-w-[85%] sm:max-w-md rounded-2xl shadow-xs ${isOwnMessage ? "bg-indigo-600 text-white rounded-br-xs" : "bg-white text-gray-900 rounded-bl-xs border border-gray-100"}`}>
+                {message.message_type === "image" && (
+                  <img src={message.media_url} alt="" className='w-full max-w-sm mb-2 rounded-xl object-cover' />
+                )}
+                <p className='leading-relaxed wrap-break-word'>{message.text}</p>
+              </div>
+            </div>
+          )
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input Box */}
+      <div className='p-3 pb-4 md:px-4 shrink-0 bg-slate-50 border-t border-gray-100'>
+        <div className='flex items-center gap-2 pl-4 pr-1.5 py-1.5 bg-white w-full border border-gray-200 shadow-xs rounded-full'>
+          <input 
+            type="text" 
+            className='flex-1 outline-none text-slate-800 text-sm bg-transparent'
             placeholder='Type a message...'
             onKeyDown={e => e.key === 'Enter' && sendMessage()}
             onChange={(e) => setText(e.target.value)}
-            value={text} />
-          <label htmlFor="image">
-            {
-              image ? <img src={URL.createObjectURL(image)} alt="" className='h-6 rounded' /> :
-                <ImageIcon className='size-5 text-gray-400 cursor-pointer' />
-            }
-            <input type='file' id='image' accept='image/*' hidden
-              onChange={(e) => setImage(e.target.files[0])} />
+            value={text} 
+          />
+          <label htmlFor="image" className='p-1.5 hover:bg-gray-100 rounded-full transition cursor-pointer'>
+            {image ? (
+              <img src={URL.createObjectURL(image)} alt="" className='h-6 w-6 object-cover rounded' />
+            ) : (
+              <ImageIcon className='w-5 h-5 text-gray-400' />
+            )}
+            <input 
+              type='file' 
+              id='image' 
+              accept='image/*' 
+              hidden
+              onChange={(e) => setImage(e.target.files[0])} 
+            />
           </label>
-          <button onClick={sendMessage} className='bg-linear-to-r from-indigo-500 to-purple-600
-          hover:from-indigo-700 hover:to-purple-800 active:scale-95 cursor-pointer text-white p-1.5 rounded-full'>
+          <button 
+            onClick={sendMessage} 
+            className='bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 active:scale-95 cursor-pointer text-white p-2 rounded-full shadow-xs transition'
+          >
             <SendHorizonal className='w-4 h-4' />
           </button>
         </div>
