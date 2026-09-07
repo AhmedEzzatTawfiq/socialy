@@ -82,20 +82,30 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
                                 <div className='flex gap-2 mt-4 md:mt-0'>
                                     <button onClick={handleFollow}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium active:scale-95 transition text-white cursor-pointer
-                                        ${currentUser?.following.includes(user._id)
+                                        ${currentUser?.following?.includes(user._id)
                                                 ? "bg-gray-600 hover:bg-gray-700"
                                                 : "bg-linear-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"}`}>
                                         <UserPlus className='w-4 h-4' />
-                                        {currentUser?.following.includes(user._id) ? "Unfollow" : "Follow"}
+                                        {currentUser?.following?.includes(user._id) ? "Unfollow" : "Follow"}
                                     </button>
-                                    <button onClick={handleConnectionRequest} className='flex items-center justify-center px-4 py-2 border border-gray-300 text-slate-500 rounded-lg hover:bg-gray-50 active:scale-95 transition cursor-pointer'>
-                                        {
-                                            currentUser?.connections.includes(user._id) ?
-                                                <MessageCircle className='w-5 h-5' />
-                                                :
-                                                <Plus className='w-5 h-5' />
-                                        }
-                                    </button>
+                                    
+                                    {currentUser?.connections?.includes(user._id) ? (
+                                        <button 
+                                            onClick={() => navigate("/messages/" + user._id)} 
+                                            title="Chat with user"
+                                            className='flex items-center justify-center px-4 py-2 border border-gray-300 text-slate-500 rounded-lg hover:bg-gray-50 active:scale-95 transition cursor-pointer'
+                                        >
+                                            <MessageCircle className='w-5 h-5' />
+                                        </button>
+                                    ) : (
+                                        <button 
+                                            onClick={handleConnectionRequest} 
+                                            title="Connect"
+                                            className='flex items-center justify-center px-4 py-2 border border-gray-300 text-slate-500 rounded-lg hover:bg-gray-50 active:scale-95 transition cursor-pointer'
+                                        >
+                                            <Plus className='w-5 h-5' />
+                                        </button>
+                                    )}
                                 </div>
                             )
                         }

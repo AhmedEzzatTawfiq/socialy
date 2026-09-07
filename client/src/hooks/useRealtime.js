@@ -15,6 +15,8 @@ export const useRealtime = () => {
   const dispatch = useDispatch()
   const { pathname } = useLocation()
   const pathnameRef = useRef(pathname)
+  const seenNotificationIdsRef = useRef(new Set())
+  const seenMessageIdsRef = useRef(new Set())
 
   useEffect(() => {
     pathnameRef.current = pathname
@@ -33,18 +35,26 @@ export const useRealtime = () => {
     fetchData()
   }, [user, getToken, dispatch])
 
-  // Socket and SSE
+  // Socket and SSE real-time event listeners
   useEffect(() => {
     if (user) {
       socket.emit("join", user.id)
 
       const handleNewMessage = (message) => {
+        if (!message || !message._id) return
+        if (seenMessageIdsRef.current.has(message._id)) return
+        seenMessageIdsRef.current.add(message._id)
+
         if (pathnameRef.current === ("/messages/" + message.from_user_id)) {
           dispatch(addMessage(message))
         }
       }
 
       const handleNewNotification = (notification) => {
+        if (!notification || !notification._id) return
+        if (seenNotificationIdsRef.current.has(notification._id)) return
+        seenNotificationIdsRef.current.add(notification._id)
+
         dispatch(addRealtimeNotification(notification))
         const senderName = notification.sender?.full_name || 'Someone'
         let toastMsg = 'New notification'
