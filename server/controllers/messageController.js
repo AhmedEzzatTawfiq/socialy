@@ -1,8 +1,19 @@
 import fs from 'fs';
 import imagekit from '../configs/imageKit.js';
 import Message from '../models/Message.js';
+import { emitToUser } from '../configs/socket.js';
 
-const connections = {};
+export const connections = {};
+
+export const sendSSEEvent = (userId, data) => {
+    if (connections[userId]) {
+        try {
+            connections[userId].write(`data: ${JSON.stringify(data)}\n\n`);
+        } catch (error) {
+            console.log("Error sending SSE to user:", userId, error);
+        }
+    }
+};
 
 export const sseController = (req, res) => {
     const userId = req.params.userId;
@@ -64,8 +75,10 @@ export const sendMessage = async (req, res) => {
         });
         res.json({ success: true, message });
 
-        // Send message to_user_id using SSE
+        // Send message to_user_id using WebSocket & SSE
         const messageWithUserData = await Message.findById(message._id).populate("from_user_id");
+        emitToUser(to_user_id, "new_message", messageWithUserData);
+
         if (connections[to_user_id]) {
             connections[to_user_id].write(`data: ${JSON.stringify(messageWithUserData)}\n\n`);
         }

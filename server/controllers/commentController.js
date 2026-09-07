@@ -1,5 +1,6 @@
 import Comment from '../models/Comment.js';
 import Post from '../models/post.js';
+import { createNotification } from './notificationController.js';
 
 // Add comment
 export const addComment = async (req, res) => {
@@ -15,11 +16,12 @@ export const addComment = async (req, res) => {
         });
 
         // Increment comments count on post
-        await Post.findByIdAndUpdate(postId, { $inc: { comments_count: 1 } });
+        const post = await Post.findByIdAndUpdate(postId, { $inc: { comments_count: 1 } }, { new: true });
 
         // If it's a reply, add to parent's replies array
+        let parentComment = null;
         if (parent_comment_id) {
-            await Comment.findByIdAndUpdate(parent_comment_id, {
+            parentComment = await Comment.findByIdAndUpdate(parent_comment_id, {
                 $push: { replies: comment._id }
             });
         }
@@ -28,6 +30,32 @@ export const addComment = async (req, res) => {
             .populate('user', 'full_name username profile_picture')
             .populate('parent_comment', 'content user')
             .populate('replies');
+
+        // send notifications
+        if (post && post.user) {
+            const postOwnerId = post.user.toString();
+            await createNotification({
+                sender: userId,
+                receiver: postOwnerId,
+                type: 'comment',
+                post: postId,
+                comment: comment._id
+            });
+        }
+
+        if (parentComment && parentComment.user) {
+            const parentCommentOwnerId = parentComment.user.toString();
+            const postOwnerId = post ? post.user.toString() : null;
+            if (parentCommentOwnerId !== postOwnerId) {
+                await createNotification({
+                    sender: userId,
+                    receiver: parentCommentOwnerId,
+                    type: 'comment',
+                    post: postId,
+                    comment: comment._id
+                });
+            }
+        }
 
         res.json({ success: true, comment: populatedComment });
     } catch (error) {
@@ -110,6 +138,16 @@ export const likeComment = async (req, res) => {
         }
 
         await comment.save();
+
+        if (!hasLiked) {
+            await createNotification({
+                sender: userId,
+                receiver: comment.user.toString(),
+                type: 'like_comment',
+                post: comment.post,
+                comment: commentId
+            });
+        }
 
         res.json({ success: true, comment });
     } catch (error) {

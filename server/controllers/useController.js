@@ -5,6 +5,7 @@ import path, { format } from "path"
 import Connection from "../models/Connections.js"
 import { inngest } from "../inngest/index.js"
 import Post from "../models/post.js"
+import { createNotification } from "./notificationController.js"
 
 
 
@@ -198,6 +199,13 @@ export const sendConnectionRequest = async (req, res) => {
                 data: { connectionId: newConnection._id }
             })
 
+            // send notification
+            await createNotification({
+                sender: userId,
+                receiver: id,
+                type: 'connection_request'
+            })
+
             return res.json({ success: true, message: "Connection request sent successfully" })
         } else if (connection && connection.status === "accepted") {
             return res.json({ success: false, message: "You have sent more than 20 connection request in last 24 Hours" })
@@ -248,6 +256,14 @@ export const acceptConnectionRequest = async (req, res) => {
 
         connection.status = "accepted"
         await connection.save()
+
+        // send notification
+        await createNotification({
+            sender: userId,
+            receiver: id,
+            type: 'connection_accept'
+        })
+
         res.json({ success: true, message: "Connection request accepted" })
 
     } catch (error) {

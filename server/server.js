@@ -1,4 +1,5 @@
 import express from "express"
+import { createServer } from "http"
 import cors from "cors"
 import "dotenv/config"
 import connectDB from "./configs/db.js"
@@ -10,9 +11,15 @@ import postRouter from "./routes/postRoutes.js"
 import storyRouter from "./routes/storyRouter.js"
 import messageRouter from "./routes/messageRoutes.js"
 import commentRouter from "./routes/commentRoutes.js"
+import notificationRouter from "./routes/notificationRoutes.js"
+import { initSocket } from "./configs/socket.js"
 
 const app = express()
+const server = createServer(app)
 const pkg = { serve }
+
+// Initialize Socket.io
+initSocket(server)
 
 await connectDB()
 app.use(express.json())
@@ -32,7 +39,8 @@ app.use("/api/post", postRouter)
 app.use("/api/story", storyRouter)
 app.use("/api/message", messageRouter)
 app.use("/api/comment", commentRouter)
+app.use("/api/notifications", notificationRouter)
 
 const PORT = process.env.PORT || 4000
 
-app.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`))
+server.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`))

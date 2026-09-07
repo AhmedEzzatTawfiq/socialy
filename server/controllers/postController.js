@@ -3,6 +3,7 @@ import fs from "fs";
 import User from "../models/User.js";
 import Post from "../models/post.js";
 import imagekit from "../configs/imageKit.js";
+import { createNotification } from "./notificationController.js";
 
 export const addPost = async (req, res) => {
     try {
@@ -72,8 +73,9 @@ export const likePost = async (req, res) => {
             post.likes_count = [];
         }
 
+        const isLiked = post.likes_count.includes(userId);
 
-        if (post.likes_count.includes(userId)) {
+        if (isLiked) {
             post.likes_count = post.likes_count.filter(user => user !== userId);
         } else {
             post.likes_count.push(userId);
@@ -83,7 +85,17 @@ export const likePost = async (req, res) => {
 
         await post.save();
 
-        res.json({ success: true, Message: post.likes_count.includes(userId) ? "Post unliked" : "Post liked" });
+        // Send notification if newly liked
+        if (!isLiked) {
+            await createNotification({
+                sender: userId,
+                receiver: post.user.toString(),
+                type: 'like_post',
+                post: postId
+            });
+        }
+
+        res.json({ success: true, Message: !isLiked ? "Post liked" : "Post unliked" });
 
     } catch (error) {
         console.log(error);
