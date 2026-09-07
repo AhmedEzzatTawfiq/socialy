@@ -1,14 +1,14 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { assets, dummyUserData } from '../assets/assets'
 import { CirclePlus, LogOut } from 'lucide-react'
 import MenuItems from './MenuItems'
-import { useClerk, UserButton } from '@clerk/react'
+import { useClerk, useUser } from '@clerk/react'
 import { useSelector } from 'react-redux'
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     const navigate = useNavigate()
     const user = useSelector((state) => state.user.value)
+    const { user: clerkUser } = useUser()
     const { signOut } = useClerk()
 
     return (
@@ -43,13 +43,30 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
             {/* User Section */}
             <div className='p-4 border-t border-gray-100'>
-                <div className='flex items-center justify-between'>
-                    <UserButton />
+                <div className='flex items-center justify-between gap-2'>
+                    <div 
+                        onClick={() => {
+                            setSidebarOpen(false)
+                            navigate('/profile')
+                        }} 
+                        className='flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity min-w-0 flex-1'
+                    >
+                        <img 
+                            src={user?.profile_picture || clerkUser?.imageUrl || '/default-avatar.png'} 
+                            alt={user?.full_name || 'User profile'} 
+                            className='w-9 h-9 rounded-full object-cover border border-gray-200 shadow-xs shrink-0' 
+                        />
+                        <div className='min-w-0 flex-1'>
+                            <p className='text-xs font-semibold text-gray-900 truncate'>{user?.full_name || clerkUser?.fullName}</p>
+                            <p className='text-[11px] text-gray-500 truncate'>@{user?.username || clerkUser?.username || 'user'}</p>
+                        </div>
+                    </div>
                     <button
                         onClick={() => signOut({ redirectUrl: "/" })}
-                        className='flex items-center gap-2 px-3 py-2 rounded-lg text-gray-500 bg-red-50 hover:text-red-600 transition-all duration-200 cursor-pointer text-sm font-medium'
+                        title="Logout"
+                        className='flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-gray-500 bg-red-50 hover:bg-red-100 hover:text-red-600 transition-all duration-200 cursor-pointer text-xs font-medium shrink-0'
                     >
-                        <LogOut className='w-4 h-4' />
+                        <LogOut className='w-3.5 h-3.5' />
                         Logout
                     </button>
                 </div>

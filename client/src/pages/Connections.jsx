@@ -1,18 +1,25 @@
-import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { MessageSquare, User, Users } from 'lucide-react'
 import { useAuth } from '@clerk/react'
 import { useDispatch, useSelector } from 'react-redux'
 import api from '../api/axios'
 import toast from 'react-hot-toast'
 import { fetchConnections } from '../features/connections/connectionsSlice'
-import { useEffect } from 'react'
 
 const Connections = () => {
   const navigate = useNavigate()
-  const [currentTab, setCurrentTab] = useState("Followers")
+  const location = useLocation()
+  const initialTab = location.state?.tab || new URLSearchParams(location.search).get('tab') || "Followers"
+  const [currentTab, setCurrentTab] = useState(initialTab)
   const { connections, pendingConnections, followers, following } = useSelector((state) => state.connections)
   const dispatch = useDispatch()
+
+  useEffect(() => {
+    if (location.state?.tab) {
+      setCurrentTab(location.state.tab)
+    }
+  }, [location.state])
   const dataArray = [
     { label: "Followers", value: followers, icon: Users },
     { label: "Following", value: following, icon: Users },

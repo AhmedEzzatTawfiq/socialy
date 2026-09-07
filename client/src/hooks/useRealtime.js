@@ -45,8 +45,16 @@ export const useRealtime = () => {
         if (seenMessageIdsRef.current.has(message._id)) return
         seenMessageIdsRef.current.add(message._id)
 
-        if (pathnameRef.current === ("/messages/" + message.from_user_id)) {
+        const senderId = typeof message.from_user_id === 'object' ? message.from_user_id?._id : message.from_user_id
+        const senderName = typeof message.from_user_id === 'object' ? (message.from_user_id?.full_name || 'Someone') : 'Someone'
+
+        if (pathnameRef.current === ("/messages/" + senderId)) {
           dispatch(addMessage(message))
+        } else {
+          toast.success(`New message from ${senderName}`, {
+            icon: '💬',
+            style: { borderRadius: '12px', background: '#333', color: '#fff', fontSize: '13px' }
+          })
         }
       }
 

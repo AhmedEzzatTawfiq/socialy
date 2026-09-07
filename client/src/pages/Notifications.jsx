@@ -58,7 +58,7 @@ const Notifications = () => {
         try {
             const token = await getToken();
             const { data } = await api.post(
-                '/api/user/accept-connection-request',
+                '/api/user/accept',
                 { id: senderId },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

@@ -132,19 +132,25 @@ const UserProfileInfo = ({ user, posts, profileId, setShowEdit }) => {
                                 Posts
                             </span>
                         </div>
-                        <div>
+                        <div 
+                            onClick={() => navigate('/connections', { state: { tab: 'Followers' } })} 
+                            className='cursor-pointer hover:opacity-80 transition-opacity'
+                        >
                             <span className='font-bold text-gray-900'>
                                 {user.followers.length}
                             </span>
-                            <span className='font-bold text-gray-900 ml-1.5'>
+                            <span className='font-bold text-gray-900 ml-1.5 hover:underline'>
                                 Followers
                             </span>
                         </div>
-                        <div>
+                        <div 
+                            onClick={() => navigate('/connections', { state: { tab: 'Following' } })} 
+                            className='cursor-pointer hover:opacity-80 transition-opacity'
+                        >
                             <span className='font-bold text-gray-900'>
                                 {user.following.length}
                             </span>
-                            <span className='font-bold text-gray-900 ml-1.5'>
+                            <span className='font-bold text-gray-900 ml-1.5 hover:underline'>
                                 Following
                             </span>
                         </div>
